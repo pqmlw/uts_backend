@@ -17,7 +17,7 @@ async function login(request, response, next) {
     if (loginAttemptsExceeded) {
       const attempts = 5; // Maximum number of login attempts
       throw errorResponder(
-        errorTypes.FORBIDDEN_ERROR,
+        errorTypes.FORBIDDEN,
         `[${new Date().toISOString()}] User ${email} gagal login. Attempt = ${attempts}. Limit reached.`
       );
     }
@@ -40,7 +40,7 @@ async function login(request, response, next) {
     return response.status(200).json(loginSuccess);
   } catch (error) {
     // If login attempt fails, log the time of the attempt
-    if (error.statusCode === 403 && error.error === 'FORBIDDEN_ERROR') {
+    if (error.statusCode === 403 && error.error === 'FORBIDDEN') {
       console.log(error.message);
     }
     return next(error);
