@@ -30,12 +30,18 @@ async function login(request, response, next) {
 
     if (!loginSuccess) {
       // Increment login attempts and record attempt time
-      authenticationServices.incrementLoginAttempts(email);
+      const attempts = authenticationServices.incrementLoginAttempts(email);
+    
+      // Generate logging message
+      const message = `[${new Date().toISOString()}] User ${email} gagal login. Attempt = ${attempts}.`;
+    
+      // Throw error with the logging message
       throw errorResponder(
         errorTypes.INVALID_CREDENTIALS,
-        'Wrong email or password'
+        `${message}`
       );
     }
+    
 
     return response.status(200).json(loginSuccess);
   } catch (error) {

@@ -53,7 +53,7 @@ function checkLoginAttemptsExceeded(email) {
   const attempts = loginAttempts.get(email) || 0;
 
   // Check if the login attempts limit has been reached
-  if (attempts >= 5) {
+  if (attempts >= 4) {
     return true;
   }
 
@@ -67,7 +67,9 @@ function checkLoginAttemptsExceeded(email) {
 function incrementLoginAttempts(email) {
   // Increment the login attempts for the email
   const attempts = loginAttempts.get(email) || 0;
+  const updatedAttempts = attempts + 1;
   loginAttempts.set(email, attempts + 1);
+  return updatedAttempts;
 }
 
 /**
