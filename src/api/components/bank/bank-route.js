@@ -1,6 +1,6 @@
 const express = require('express');
 
-const bankMiddleware = require('../../middlewares/bank-middleware');
+const authenticationMiddleware = require('../../middlewares/authentication-middleware');
 const celebrate = require('../../../core/celebrate-wrappers');
 const bankController = require('./bank-controller');
 const bankValidator = require('./bank-validator');
@@ -8,45 +8,38 @@ const bankValidator = require('./bank-validator');
 const route = express.Router();
 
 module.exports = (app) => {
-  app.use('/bank', route);
+  app.use('/clients', route);
 
-  // Get list of transfers
-  route.get('/', bankMiddleware, bankController.getTransferHistory);
+  // Get list of clients
+  route.get('/', authenticationMiddleware, bankController.getClients);
 
-  // Login 
-  route.post(
-    '/login',
-    celebrate(bankValidator.login),
-    bankController.login
-  );
-
-  // Create transfer
+  // Create client
   route.post(
     '/',
-    bankMiddleware,
-    celebrate(bankValidator.createTransfer),
-    bankController.createTransfer
+    authenticationMiddleware,
+    celebrate(bankValidator.createClient),
+    bankController.createClient
   );
 
-  // Update transfer pin
+  // Get client detail
+  route.get('/:id', authenticationMiddleware, bankController.getClient);
+
+  // Update client
   route.put(
-    '/:pin',
-    bankMiddleware,
-    celebrate(bankValidator.updateTransferPin),
-    bankController.updateTransferPin
+    '/:id',
+    authenticationMiddleware,
+    celebrate(bankValidator.updateClient),
+    bankController.updateClient
   );
 
-  // Delete account
-  route.delete(
-    '/:account',
-    bankMiddleware,
-    bankController.deleteAccount
-  );
+  // Delete client
+  route.delete('/:id', authenticationMiddleware, bankController.deleteClient);
 
-  // Get transfer history
-  route.get(
-    '/history',
-    bankMiddleware,
-    bankController.getTransferHistory
+  // Change balance
+  route.post(
+    '/:id/change-balance',
+    authenticationMiddleware,
+    celebrate(bankValidator.changeBalance),
+    bankController.changeBalance
   );
 };

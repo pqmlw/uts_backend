@@ -1,113 +1,118 @@
-const bankService = require('./bank-service');
+const clientsService = require('./bank-service');
 const { errorResponder, errorTypes } = require('../../../core/errors');
-const { accountNumber } = require('../../../models/transfers-schema');
+const { generateUniqueAccountNumber } = require('./bank-service'); // Import the generateUniqueAccountNumber function
 
-/**
- * Handle login request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
-async function login(request, response, next) {
-  const { accountNumber, accessCode } = request.body;
-
+async function getClients(request, response, next) {
   try {
-    // Check login credentials
-    const loginSuccess = await bankService.checkLoginBank(
-      accountNumber,
-      accessCode
-    );
-
-    if (!loginSuccess) {
-      throw errorResponder(
-        errorTypes.INVALID_CREDENTIALS,
-        'Wrong access code'
-      );
-    }
-
-    return response.status(200).json(loginSuccess);
+    const clients = await clientsService.getClients();
+    return response.status(200).json(clients);
   } catch (error) {
     return next(error);
   }
 }
-/**
- * Handle get list of users request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
-async function createTransfer(request, response, next) {
-  try {
-    const accountNumber = request.body.accountNumber;
-    const accessCode = request.body.accessCode;
-    const pin = request.body.pin;
 
-    const success = await bankService.createTransfer(accountNumber, accessCode, pin);
+async function getClient(request, response, next) {
+  try {
+    const client = await clientsService.getClient(request.params.id);
+
+    if (!client) {
+      throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'Unknown client');
+    }
+
+    return response.status(200).json(client);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function createClient(request, response, next) {
+  try {
+    const { name, email, accessCode, pin, balance } = request.body;
+
+    // Generate unique account number
+    const accountNumber = await generateUniqueAccountNumber(); // Await the function call
+
+    // Perform necessary validations
+
+    const success = await clientsService.createClient(name, email, accountNumber, accessCode, pin, balance);
     if (!success) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to create transfer'
+        'Failed to create client'
       );
     }
 
-    return response.status(200).json({ accountNumber, accessCode, pin });
+    return response.status(200).json({ name, email, accountNumber });
   } catch (error) {
     return next(error);
   }
 }
 
-
-async function updateTransferPin(request, response, next) {
+async function updateClient(request, response, next) {
   try {
-    const pin = request.body.pin;
+    const id = request.params.id;
+    const { name, email, balance } = request.body;
 
-    const success = await bankService.updateTransferPin(pin);
+    // Perform necessary validations
+
+    const success = await clientsService.updateClient(id, name, email, balance);
     if (!success) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to update transfer pin'
+        'Failed to update client'
       );
     }
 
-    return response.status(200).json({ });
+    return response.status(200).json({ id });
   } catch (error) {
     return next(error);
   }
 }
 
-async function deleteAccount(request, response, next) {
+async function deleteClient(request, response, next) {
   try {
-    const accountNumber = request.body.accountNumber;
+    const id = request.params.id;
 
-    const success = await bankService.deleteAccount(accountNumber);
+    const success = await clientsService.deleteClient(id);
     if (!success) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to delete account'
+        'Failed to delete client'
       );
     }
 
-    return response.status(200).json({ accountNumber });
+    return response.status(200).json({ id });
   } catch (error) {
     return next(error);
   }
 }
 
-async function getTransferHistory(request, response, next) {
+async function changeBalance(request, response, next) {
   try {
-    const history = await bankService.getTransferHistory();
-    return response.status(200).json(history);
+    const id = request.params.id;
+    const { balance } = request.body;
+
+    // Perform necessary validations
+
+    const success = await clientsService.changeBalance(id, balance);
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Failed to change balance'
+      );
+    }
+
+    return response.status(200).json({ id });
   } catch (error) {
     return next(error);
   }
 }
 
 module.exports = {
-  login,
-  createTransfer,
-  updateTransferPin,
-  deleteAccount,
-  getTransferHistory,
+  getClients,
+  getClient,
+  createClient,
+  updateClient,
+  deleteClient,
+  changeBalance,
 };

@@ -1,30 +1,35 @@
 const joi = require('joi');
 
 module.exports = {
-  login: {
+  createClient: {
     body: {
-      accountNumber: joi.string().required().label('Nomor rekening'),
-      accessCode: joi.string().required().label('Access code'),
-    },
-  },
-
-  createTransfer: {
-    body: {
-      accountNumber: joi.string().required().label('Account number'),
-      accessCode: joi.string().required().label('Access code'),
+      name: joi.string().required().label('Name'),
+      email: joi.string().email().required().label('Email'),
+      accessCode: joi.string().required().label('Access Code'),
       pin: joi.number().required().label('PIN'),
+      balance: joi.number().required().label('Balance'),
     },
   },
 
-  updateTransferPin: {
+  updateClient: {
     body: {
-      pin: joi.string().required().label('Pin'),
+      name: joi.string().required().label('Name'),
+      email: joi.string().email().required().label('Email'),
+      accessCode: joi.string().required().label('Access Code'),
+      pin: joi.number().required().label('PIN'),
+      balance: joi.number().required().label('Balance'),
     },
   },
 
-  deleteAccount: {
+  deleteClient: {
     body: {
-      accountNumber: joi.string().required().label('Nomor rekening tujuan'),
+      clientId: joi.number().required().label('Client ID'),
     },
   },
+
+  changeBalance: {
+    body: {
+      balance: joi.number().required().label('Balance')
+    }
+  }
 };

@@ -1,96 +1,153 @@
-const bankRepository = require('./bank-repository');
-const { errorResponder, errorTypes } = require('../../../core/errors');
-const { generateTokenBank } = require('../../../utils/token-bank');
+const clientsRepository = require('./bank-repository');
+const { hashPassword, passwordMatched } = require('../../../utils/password');
 
-async function checkLoginBank(accountNumber, accessCode) {
-  const transfer = await bankRepository;
-  if (accountNumber && accessCode) {
-    return {
-      token: generateTokenBank(accountNumber, accessCode),
-    };
+async function getClients() {
+  const clients = await clientsRepository.getClients();
+
+  const results = [];
+  for (let i = 0; i < clients.length; i += 1) {
+    const client = clients[i];
+    results.push({
+      id: client.id,
+      name: client.name,
+      email: client.email,
+      accountNumber: client.accountNumber,
+      accessCode: client.accessCode,
+      pin: client.pin,
+      balance: client.balance
+    });
   }
-  return null;
+
+  return results;
 }
 
-async function getTransfers(request, response, next) {
-  try {
-    const transfers = await bankRepository.getTransfers();
-    return response.status(200).json(transfers);
-  } catch (error) {
-    return next(error);
+async function getClient(id) {
+  const client = await clientsRepository.getClient(id);
+
+  if (!client) {
+    return null;
   }
+
+  return {
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    accountNumber: client.accountNumber,
+    accessCode: client.accessCode,
+    pin: client.pin,
+    balance: client.balance
+  };
 }
 
-async function createTransfer(request, response, next) {
+async function createClient(name, email, accountNumber, accessCode, pin, balance) {
+  const stringPin = String(pin)
+  
+  const hashedAccessCode = await hashPassword(accessCode);
+  const hashedPin = await hashPassword(stringPin)
+
   try {
-    const accountNumber = request.body.accountNumber;
-    const accessCode = request.body.accessCode;
-    const pin = request.body.pin;
-
-    const success = await bankRepository.createTransfer(accountNumber, accessCode, pin);
-    if (!success) {
-      throw errorResponder(
-        errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to create transfer'
-      );
-    }
-
-    return response.status(200).json({ accountNumber, accessCode, pin });
-  } catch (error) {
-    return next(error);
+    await clientsRepository.createClient(name, email, accountNumber, hashedAccessCode, hashedPin, balance);
+  } catch (err) {
+    return null;
   }
+
+  return true;
 }
 
-async function updateTransferPin(request, response, next) {
-  try {
-    const pin = request.body.pin;
 
-    const success = await bankRepository.updateTransferPin(pin);
-    if (!success) {
-      throw errorResponder(
-        errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to update transfer pin'
-      );
-    }
+async function updateClient(id, name, email, accountNumber) {
+  const client = await clientsRepository.getClient(id);
 
-    return response.status(200).json({ id });
-  } catch (error) {
-    return next(error);
+  if (!client) {
+    return null;
   }
+
+  try {
+    await clientsRepository.updateClient(id, name, email, accountNumber);
+  } catch (err) {
+    return null;
+  }
+
+  return true;
 }
 
-async function deleteAccount(request, response, next) {
-  try {
-    const receiver = request.params.receiver;
+async function deleteClient(id) {
+  const client = await clientsRepository.getClient(id);
 
-    const success = await bankRepository.deleteAccount(receiver);
-    if (!success) {
-      throw errorResponder(
-        errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to delete receiver account'
-      );
-    }
-
-    return response.status(200).json({ receiver });
-  } catch (error) {
-    return next(error);
+  if (!client) {
+    return null;
   }
+
+  try {
+    await clientsRepository.deleteClient(id);
+  } catch (err) {
+    return null;
+  }
+
+  return true;
 }
 
-async function getTransferHistory(request, response, next) {
-  try {
-    const history = await bankRepository.getTransferHistory();
-    return response.status(200).json(history);
-  } catch (error) {
-    return next(error);
+async function emailIsRegistered(email) {
+  const client = await clientsRepository.getClientByEmail(email);
+
+  return !!client;
+}
+
+async function checkPin(id, pin) {
+  const client = await clientsRepository.getClient(id);
+  
+  if (!client) {
+    return false;
   }
+
+  return passwordMatched(pin, client.pin);
+}
+
+async function changeBalance(id, balance) {
+  const client = await clientsRepository.getClient(id);
+
+  if (!client) {
+    return false;
+  }
+
+  try {
+    await clientsRepository.changeBalance(id, balance);
+  } catch (err) {
+    return false;
+  }
+
+  return true;
+}
+
+async function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Generate a unique account number
+async function generateUniqueAccountNumber() {
+  const min = 1000000000; // Minimum 10-digit number
+  const max = 9999999999; // Maximum 10-digit number
+  let accountNumber;
+
+  do {
+    accountNumber = getRandomNumber(min, max);
+    // Check if the account number already exists in the database
+    // You need to implement this check using your database querying mechanism
+    // For demonstration purposes, we assume there's no duplication
+    isUnique = true; // Placeholder condition assuming the number is unique
+  } while (!isUnique);
+
+  return accountNumber;
 }
 
 module.exports = {
-  checkLoginBank,
-  getTransfers,
-  createTransfer,
-  updateTransferPin,
-  deleteAccount,
-  getTransferHistory, 
+  getClients,
+  getClient,
+  createClient,
+  updateClient,
+  deleteClient,
+  emailIsRegistered,
+  checkPin,
+  changeBalance,
+  generateUniqueAccountNumber,
 };
