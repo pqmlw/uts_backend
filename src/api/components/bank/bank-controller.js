@@ -32,8 +32,6 @@ async function createClient(request, response, next) {
     // Generate unique account number
     const accountNumber = await generateUniqueAccountNumber(); // Await the function call
 
-    // Perform necessary validations
-
     const success = await clientsService.createClient(name, email, accountNumber, accessCode, pin, balance);
     if (!success) {
       throw errorResponder(
@@ -42,7 +40,17 @@ async function createClient(request, response, next) {
       );
     }
 
-    return response.status(200).json({ name, email, accountNumber });
+    return response.status(200).json({ 
+      message: 'Account created successfully',
+      data: {
+        name,
+        email,
+        accountNumber,
+        accessCode,
+        pin,
+        balance,
+      }
+    });
   } catch (error) {
     return next(error);
   }
@@ -63,7 +71,15 @@ async function updateClient(request, response, next) {
       );
     }
 
-    return response.status(200).json({ id });
+    return response.status(200).json({ 
+      message: 'Account updated successfully',
+      data: {
+        id,
+        name,
+        email,
+        balance,
+      }
+    });
   } catch (error) {
     return next(error);
   }
@@ -81,28 +97,10 @@ async function deleteClient(request, response, next) {
       );
     }
 
-    return response.status(200).json({ id });
-  } catch (error) {
-    return next(error);
-  }
-}
-
-async function changeBalance(request, response, next) {
-  try {
-    const id = request.params.id;
-    const { balance } = request.body;
-
-    // Perform necessary validations
-
-    const success = await clientsService.changeBalance(id, balance);
-    if (!success) {
-      throw errorResponder(
-        errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to change balance'
-      );
-    }
-
-    return response.status(200).json({ id });
+    return response.status(200).json({ 
+      id,
+      message: 'Account deleted successfully'
+    });
   } catch (error) {
     return next(error);
   }
@@ -114,5 +112,4 @@ module.exports = {
   createClient,
   updateClient,
   deleteClient,
-  changeBalance,
 };

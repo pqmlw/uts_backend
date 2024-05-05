@@ -1,5 +1,6 @@
 const clientsRepository = require('./bank-repository');
-const { hashPassword, passwordMatched } = require('../../../utils/password');
+const { hashPassword } = require('../../../utils/password');
+
 
 async function getClients() {
   const clients = await clientsRepository.getClients();
@@ -87,37 +88,6 @@ async function deleteClient(id) {
   return true;
 }
 
-async function emailIsRegistered(email) {
-  const client = await clientsRepository.getClientByEmail(email);
-
-  return !!client;
-}
-
-async function checkPin(id, pin) {
-  const client = await clientsRepository.getClient(id);
-  
-  if (!client) {
-    return false;
-  }
-
-  return passwordMatched(pin, client.pin);
-}
-
-async function changeBalance(id, balance) {
-  const client = await clientsRepository.getClient(id);
-
-  if (!client) {
-    return false;
-  }
-
-  try {
-    await clientsRepository.changeBalance(id, balance);
-  } catch (err) {
-    return false;
-  }
-
-  return true;
-}
 
 async function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -146,8 +116,5 @@ module.exports = {
   createClient,
   updateClient,
   deleteClient,
-  emailIsRegistered,
-  checkPin,
-  changeBalance,
   generateUniqueAccountNumber,
 };

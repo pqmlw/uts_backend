@@ -35,11 +35,4 @@ module.exports = (app) => {
   // Delete client
   route.delete('/:id', authenticationMiddleware, bankController.deleteClient);
 
-  // Change balance
-  route.post(
-    '/:id/change-balance',
-    authenticationMiddleware,
-    celebrate(bankValidator.changeBalance),
-    bankController.changeBalance
-  );
 };

@@ -38,16 +38,10 @@ async function deleteClient(id) {
   return Client.deleteOne({ _id: id });
 }
 
-async function getClientByEmail(email) {
-  return Client.findOne({ email });
-}
-
-
 module.exports = {
   getClients,
   getClient,
   createClient,
   updateClient,
   deleteClient,
-  getClientByEmail,
 };

@@ -26,10 +26,4 @@ module.exports = {
       clientId: joi.number().required().label('Client ID'),
     },
   },
-
-  changeBalance: {
-    body: {
-      balance: joi.number().required().label('Balance')
-    }
-  }
 };
