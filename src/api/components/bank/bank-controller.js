@@ -1,7 +1,8 @@
 const clientsService = require('./bank-service');
 const { errorResponder, errorTypes } = require('../../../core/errors');
-const { generateUniqueAccountNumber } = require('./bank-service'); // Import the generateUniqueAccountNumber function
+const { generateUniqueAccountNumber } = require('./bank-service');
 
+// Fungsi untuk menampilkan list clients
 async function getClients(request, response, next) {
   try {
     const clients = await clientsService.getClients();
@@ -11,6 +12,7 @@ async function getClients(request, response, next) {
   }
 }
 
+// Fungsi untuk menampilkan client berdasarkan id
 async function getClient(request, response, next) {
   try {
     const client = await clientsService.getClient(request.params.id);
@@ -25,12 +27,13 @@ async function getClient(request, response, next) {
   }
 }
 
+// Fungsi untuk membuat akun client
 async function createClient(request, response, next) {
   try {
     const { name, email, accessCode, pin, balance } = request.body;
 
-    // Generate unique account number
-    const accountNumber = await generateUniqueAccountNumber(); // Await the function call
+    // Angka random untuk account number
+    const accountNumber = await generateUniqueAccountNumber(); 
 
     const success = await clientsService.createClient(name, email, accountNumber, accessCode, pin, balance);
     if (!success) {
@@ -56,6 +59,7 @@ async function createClient(request, response, next) {
   }
 }
 
+// Fungsi untuk update data client
 async function updateClient(request, response, next) {
   try {
     const id = request.params.id;
@@ -85,6 +89,7 @@ async function updateClient(request, response, next) {
   }
 }
 
+// Fungsi untuk menghapus akun client
 async function deleteClient(request, response, next) {
   try {
     const id = request.params.id;

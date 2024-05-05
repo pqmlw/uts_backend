@@ -1,7 +1,6 @@
 const clientsRepository = require('./bank-repository');
 const { hashPassword } = require('../../../utils/password');
 
-
 async function getClients() {
   const clients = await clientsRepository.getClients();
 
@@ -43,6 +42,7 @@ async function getClient(id) {
 async function createClient(name, email, accountNumber, accessCode, pin, balance) {
   const stringPin = String(pin)
   
+  //Hash access code dan pin
   const hashedAccessCode = await hashPassword(accessCode);
   const hashedPin = await hashPassword(stringPin)
 
