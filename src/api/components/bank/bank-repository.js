@@ -1,16 +1,32 @@
 const { Client } = require('../../../models');
 
-// Menampilkan list clients
+/**
+ * Get users
+ * @returns {Promise}
+ */
 async function getClients() {
   return Client.find({});
 }
 
-// Menampilkan client berdasarkan id
+/**
+ * Get user detail
+ * @param {string} id - User ID
+ * @returns {Promise}
+ */
 async function getClient(id) {
   return Client.findById(id);
 }
 
-// Membuat akun client baru
+/**
+ * Create new user
+ * @param {string} name - Name
+ * @param {string} email - Email
+ * @param {number} accountNumber - account number
+ * @param {string} accessCode - access code
+ * @param {number} pin -pin
+ * @param {number} balance -balance
+ * @returns {Promise}
+ */
 async function createClient(name, email, accountNumber, accessCode, pin, balance) {
   return Client.create({
     name,
@@ -22,7 +38,11 @@ async function createClient(name, email, accountNumber, accessCode, pin, balance
   });
 }
 
-// Mengupdate info client
+/**
+ * Update a user
+ * @param {string} id - User ID
+ * @returns {Promise}
+ */
 async function updateClient(id, name, email, balance) {
   return Client.updateOne(
     {
@@ -38,7 +58,11 @@ async function updateClient(id, name, email, balance) {
   );
 }
 
-// Menghapus akun client
+/**
+ * Delete a user
+ * @param {string} id - User ID
+ * @returns {Promise}
+ */
 async function deleteClient(id) {
   return Client.deleteOne({ _id: id });
 }

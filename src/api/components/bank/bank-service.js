@@ -1,6 +1,10 @@
 const clientsRepository = require('./bank-repository');
 const { hashPassword } = require('../../../utils/password');
 
+/**
+ * Get list of users
+ * @returns {Array}
+ */
 async function getClients() {
   const clients = await clientsRepository.getClients();
 
@@ -21,6 +25,11 @@ async function getClients() {
   return results;
 }
 
+/**
+ * Get user detail
+ * @param {string} id - User ID
+ * @returns {Object}
+ */
 async function getClient(id) {
   const client = await clientsRepository.getClient(id);
 
@@ -39,39 +48,56 @@ async function getClient(id) {
   };
 }
 
+/**
+ * Create new user
+ * @param {string} name - Name
+ * @param {string} email - Email
+ * @param {string} accessCode - access code
+ * @param {number} pin -pin
+ * @param {number} balance -balance
+ * @returns {boolean}
+ */
 async function createClient(name, email, accountNumber, accessCode, pin, balance) {
   const stringPin = String(pin)
   
-  //Hash access code dan pin
+  // Hash access code dan pin
   const hashedAccessCode = await hashPassword(accessCode);
-  const hashedPin = await hashPassword(stringPin)
+  const hashedPin = await hashPassword(stringPin);
 
-  try {
-    await clientsRepository.createClient(name, email, accountNumber, hashedAccessCode, hashedPin, balance);
-  } catch (err) {
-    return null;
+  const success = await clientsRepository.createClient(name, email, accountNumber, hashedAccessCode, hashedPin, balance);
+  if(success) {
+    return true
+  } else {
+    return false
   }
-
-  return true;
-}
-
-
-async function updateClient(id, name, email, accountNumber) {
+} 
+/**
+ * Update existing user
+ * @param {string} id - User ID
+ * @returns {boolean}
+ */
+async function updateClient(id) {
   const client = await clientsRepository.getClient(id);
 
   if (!client) {
-    return null;
+    return false; // Mengembalikan false jika klien tidak ditemukan
   }
 
-  try {
-    await clientsRepository.updateClient(id, name, email, accountNumber);
-  } catch (err) {
-    return null;
-  }
 
-  return true;
+  const success = await clientsRepository.updateClient(id);
+  if(success) {
+    return true
+  } else {
+    return false
+  }
+    
 }
 
+/**
+ * Delete user
+ * @param {string} id - User ID
+ * @returns {boolean}
+ */
 async function deleteClient(id) {
   const client = await clientsRepository.getClient(id);
 
@@ -79,13 +105,13 @@ async function deleteClient(id) {
     return null;
   }
 
-  try {
-    await clientsRepository.deleteClient(id);
-  } catch (err) {
-    return null;
+  const success = await clientsRepository.getClient(id);
+  if(success) {
+    return true
+  } else {
+    return false
   }
-
-  return true;
+    
 }
 
 

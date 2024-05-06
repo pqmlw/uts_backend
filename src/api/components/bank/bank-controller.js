@@ -2,7 +2,13 @@ const clientsService = require('./bank-service');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 const { generateUniqueAccountNumber } = require('./bank-service');
 
-// Fungsi untuk menampilkan list clients
+/**
+ * Fungsi untuk menampilkan client
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function getClients(request, response, next) {
   try {
     const clients = await clientsService.getClients();
@@ -12,7 +18,15 @@ async function getClients(request, response, next) {
   }
 }
 
-// Fungsi untuk menampilkan client berdasarkan id
+/**
+ * Fungsi untuk menampilkan client berdasarkan id
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ *
+ */
+
 async function getClient(request, response, next) {
   try {
     const client = await clientsService.getClient(request.params.id);
@@ -27,7 +41,14 @@ async function getClient(request, response, next) {
   }
 }
 
-// Fungsi untuk membuat akun client
+/**
+ * Fungsi untuk membuat akun client
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ *
+ */
 async function createClient(request, response, next) {
   try {
     const { name, email, accessCode, pin, balance } = request.body;
@@ -44,28 +65,25 @@ async function createClient(request, response, next) {
     }
 
     return response.status(200).json({ 
-      message: 'Account created successfully',
-      data: {
-        name,
-        email,
-        accountNumber,
-        accessCode,
-        pin,
-        balance,
-      }
+      message: 'Account created successfully'
     });
   } catch (error) {
     return next(error);
   }
 }
 
-// Fungsi untuk update data client
+/**
+ * Fungsi untuk update client 
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ *
+ */
 async function updateClient(request, response, next) {
   try {
     const id = request.params.id;
     const { name, email, balance } = request.body;
-
-    // Perform necessary validations
 
     const success = await clientsService.updateClient(id, name, email, balance);
     if (!success) {
@@ -76,20 +94,22 @@ async function updateClient(request, response, next) {
     }
 
     return response.status(200).json({ 
-      message: 'Account updated successfully',
-      data: {
-        id,
-        name,
-        email,
-        balance,
-      }
+      message: 'Account updated successfully'
     });
   } catch (error) {
     return next(error);
   }
 }
 
-// Fungsi untuk menghapus akun client
+
+/**
+ * Fungsi untuk delete client 
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ *
+ */
 async function deleteClient(request, response, next) {
   try {
     const id = request.params.id;
@@ -103,7 +123,6 @@ async function deleteClient(request, response, next) {
     }
 
     return response.status(200).json({ 
-      id,
       message: 'Account deleted successfully'
     });
   } catch (error) {
